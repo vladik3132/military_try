@@ -16,6 +16,10 @@
             </column>
             <column name="description" type="VARCHAR(200)"/>
         </createTable>
+
+        <rollback>
+            <dropTable tableName="roles"/>
+        </rollback>
     </changeSet>
 
     <changeSet id="006-create-users" author="chatgpt">
@@ -41,6 +45,10 @@
             <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
             <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
+
+        <rollback>
+            <dropTable tableName="users"/>
+        </rollback>
     </changeSet>
 
     <changeSet id="006-create-user-roles" author="chatgpt">
@@ -61,6 +69,12 @@
         <addForeignKeyConstraint baseTableName="user_roles" baseColumnNames="role_id"
                                   referencedTableName="roles" referencedColumnNames="id"
                                   constraintName="fk_user_roles_role" onDelete="CASCADE"/>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="user_roles" constraintName="fk_user_roles_role"/>
+            <dropForeignKeyConstraint baseTableName="user_roles" constraintName="fk_user_roles_user"/>
+            <dropTable tableName="user_roles"/>
+        </rollback>
     </changeSet>
 
     <changeSet id="006-insert-default-roles" author="chatgpt">
@@ -77,6 +91,12 @@
             <column name="name" value="ROLE_VIEWER"/>
             <column name="description" value="Перегляд інформації"/>
         </insert>
+
+        <rollback>
+            <delete tableName="roles">
+                <where>name IN ('ROLE_ADMIN','ROLE_OPERATOR','ROLE_VIEWER')</where>
+            </delete>
+        </rollback>
     </changeSet>
 
     <changeSet id="006-insert-default-admin" author="chatgpt">
@@ -96,5 +116,14 @@
             FROM users u, roles r
             WHERE u.username = 'admin' AND r.name = 'ROLE_ADMIN';
         </sql>
+
+        <rollback>
+            <delete tableName="user_roles">
+                <where>user_id IN (SELECT id FROM users WHERE username = 'admin')</where>
+            </delete>
+            <delete tableName="users">
+                <where>username = 'admin'</where>
+            </delete>
+        </rollback>
     </changeSet>
 </databaseChangeLog>
