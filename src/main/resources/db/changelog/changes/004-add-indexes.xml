@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="004-add-indexes" author="gpt-5.1-codex-max">
+        <comment>Додавання індексів для таблиць транспортного обліку</comment>
+
+        <createIndex tableName="vehicles" indexName="idx_vehicles_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="vehicles" indexName="idx_vehicles_category">
+            <column name="category_id"/>
+        </createIndex>
+
+        <createIndex tableName="vehicles" indexName="idx_vehicles_driver">
+            <column name="driver_id"/>
+        </createIndex>
+
+        <createIndex tableName="drivers" indexName="idx_drivers_active">
+            <column name="is_active"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_drivers_active" tableName="drivers"/>
+            <dropIndex indexName="idx_vehicles_driver" tableName="vehicles"/>
+            <dropIndex indexName="idx_vehicles_category" tableName="vehicles"/>
+            <dropIndex indexName="idx_vehicles_status" tableName="vehicles"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

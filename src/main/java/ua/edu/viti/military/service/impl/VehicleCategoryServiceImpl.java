@@ -8,6 +8,7 @@ import ua.edu.viti.military.dto.request.VehicleCategoryCreateRequest;
 import ua.edu.viti.military.dto.request.VehicleCategoryUpdateRequest;
 import ua.edu.viti.military.dto.response.VehicleCategoryResponse;
 import ua.edu.viti.military.entity.VehicleCategory;
+import ua.edu.viti.military.exception.DuplicateResourceException;
 import ua.edu.viti.military.exception.ResourceNotFoundException;
 import ua.edu.viti.military.repository.VehicleCategoryRepository;
 import ua.edu.viti.military.service.VehicleCategoryService;
@@ -27,11 +28,22 @@ public class VehicleCategoryServiceImpl implements VehicleCategoryService {
     @Transactional
     public VehicleCategoryResponse create(VehicleCategoryCreateRequest request) {
         log.info("Creating vehicle category: {}", request.getName());
-        
+
+        if (vehicleCategoryRepository.existsByName(request.getName())) {
+            throw new DuplicateResourceException("Категорія з назвою " + request.getName() + " вже існує");
+        }
+
+        if (vehicleCategoryRepository.existsByCode(request.getCode())) {
+            throw new DuplicateResourceException("Категорія з кодом " + request.getCode() + " вже існує");
+        }
+
         VehicleCategory category = new VehicleCategory();
         category.setName(request.getName());
+        category.setCode(request.getCode());
         category.setDescription(request.getDescription());
+        category.setRequiredLicense(request.getRequiredLicense());
         category.setMaxLoadCapacity(request.getMaxLoadKg());
+        category.setSeats(request.getSeats());
 
         VehicleCategory saved = vehicleCategoryRepository.save(category);
         log.info("Vehicle category created with ID: {}", saved.getId());
@@ -67,9 +79,28 @@ public class VehicleCategoryServiceImpl implements VehicleCategoryService {
         VehicleCategory category = vehicleCategoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("VehicleCategory not found: " + id));
 
-        if (request.getName() != null) category.setName(request.getName());
+        if (request.getName() != null) {
+            vehicleCategoryRepository.findByName(request.getName())
+                    .filter(existing -> !existing.getId().equals(id))
+                    .ifPresent(existing -> {
+                        throw new DuplicateResourceException("Категорія з назвою " + request.getName() + " вже існує");
+                    });
+            category.setName(request.getName());
+        }
+
+        if (request.getCode() != null) {
+            vehicleCategoryRepository.findByCode(request.getCode())
+                    .filter(existing -> !existing.getId().equals(id))
+                    .ifPresent(existing -> {
+                        throw new DuplicateResourceException("Категорія з кодом " + request.getCode() + " вже існує");
+                    });
+            category.setCode(request.getCode());
+        }
+
         if (request.getDescription() != null) category.setDescription(request.getDescription());
+        if (request.getRequiredLicense() != null) category.setRequiredLicense(request.getRequiredLicense());
         if (request.getMaxLoadKg() != null) category.setMaxLoadCapacity(request.getMaxLoadKg());
+        if (request.getSeats() != null) category.setSeats(request.getSeats());
 
         VehicleCategory saved = vehicleCategoryRepository.save(category);
         log.info("Vehicle category with ID {} updated successfully", id);
@@ -98,6 +129,7 @@ public class VehicleCategoryServiceImpl implements VehicleCategoryService {
         r.setDescription(c.getDescription());
         r.setRequiredLicense(c.getRequiredLicense());
         r.setMaxLoadCapacity(c.getMaxLoadCapacity());
+        r.setSeats(c.getSeats());
         r.setCreatedAt(c.getCreatedAt());
         r.setUpdatedAt(c.getUpdatedAt());
         return r;

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="seed-002-drivers" author="gpt-5.1-codex-max" context="dev">
+        <comment>Початкові дані для водіїв</comment>
+
+        <insert tableName="drivers">
+            <column name="military_id" value="MIL-1001"/>
+            <column name="first_name" value="Олександр"/>
+            <column name="last_name" value="Коваль"/>
+            <column name="rank" value="Сержант"/>
+            <column name="license_number" value="LIC-001"/>
+            <column name="license_categories" value="B,C"/>
+            <column name="phone_number" value="+380671111111"/>
+        </insert>
+
+        <insert tableName="drivers">
+            <column name="military_id" value="MIL-1002"/>
+            <column name="first_name" value="Іван"/>
+            <column name="last_name" value="Петренко"/>
+            <column name="rank" value="Молодший сержант"/>
+            <column name="license_number" value="LIC-002"/>
+            <column name="license_categories" value="C"/>
+            <column name="phone_number" value="+380672222222"/>
+        </insert>
+
+        <insert tableName="drivers">
+            <column name="military_id" value="MIL-1003"/>
+            <column name="first_name" value="Марина"/>
+            <column name="last_name" value="Лисенко"/>
+            <column name="rank" value="Лейтенант"/>
+            <column name="license_number" value="LIC-003"/>
+            <column name="license_categories" value="B"/>
+            <column name="phone_number" value="+380673333333"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="drivers">
+                <where>military_id IN ('MIL-1001','MIL-1002','MIL-1003')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
