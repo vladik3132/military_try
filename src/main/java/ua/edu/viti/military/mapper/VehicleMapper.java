@@ -31,6 +31,7 @@ public interface VehicleMapper {
     @Mapping(target = "driver", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "fuelType", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Vehicle toEntity(VehicleCreateRequest request);
@@ -41,6 +42,7 @@ public interface VehicleMapper {
     @Mapping(target = "driver", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "fuelType", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntityFromDto(VehicleUpdateRequest request, @MappingTarget Vehicle entity);

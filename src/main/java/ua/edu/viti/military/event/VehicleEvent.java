@@ -2,11 +2,13 @@ package ua.edu.viti.military.event;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
+import ua.edu.viti.military.entity.Driver;
 import ua.edu.viti.military.entity.Vehicle;
 import ua.edu.viti.military.entity.VehicleMovementType;
 import ua.edu.viti.military.entity.VehicleStatus;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
 public class VehicleEvent extends ApplicationEvent {
@@ -18,7 +20,7 @@ public class VehicleEvent extends ApplicationEvent {
     private final VehicleStatus newStatus;
     private final String driverName;
     private final String performedBy;
-    private final LocalDateTime timestamp;
+    private final LocalDateTime occurredAt;
     private final String notes;
 
     public VehicleEvent(
@@ -36,9 +38,24 @@ public class VehicleEvent extends ApplicationEvent {
         this.type = type;
         this.previousStatus = previousStatus;
         this.newStatus = newStatus;
-        this.driverName = vehicle.getDriver() != null ? vehicle.getDriver().getFullName() : null;
+        this.driverName = buildDriverFullName(vehicle.getDriver());
         this.performedBy = performedBy;
-        this.timestamp = LocalDateTime.now();
+        this.occurredAt = LocalDateTime.now();
         this.notes = notes;
+    }
+
+    private String buildDriverFullName(Driver driver) {
+        if (driver == null) {
+            return null;
+        }
+
+        String fullName = String.join(" ",
+                Objects.toString(driver.getLastName(), ""),
+                Objects.toString(driver.getFirstName(), ""),
+                Objects.toString(driver.getMiddleName(), ""))
+                .replaceAll("\\s+", " ")
+                .trim();
+
+        return fullName.isEmpty() ? null : fullName;
     }
 }

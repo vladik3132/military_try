@@ -22,11 +22,13 @@ public interface VehicleCategoryMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "maxLoadCapacity", source = "maxLoadKg")
     VehicleCategory toEntity(VehicleCategoryCreateRequest request);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "maxLoadCapacity", source = "maxLoadKg")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(VehicleCategoryUpdateRequest request, @MappingTarget VehicleCategory entity);
 }
