@@ -30,6 +30,7 @@ public class VehicleResponse {
     private Double fuelConsumption;
     private Integer maintenanceIntervalKm;
     private LocalDate lastMaintenanceDate;
+    private LocalDate nextMaintenanceDate;
     private Integer lastMaintenanceMileage;
 
     private Long driverId;

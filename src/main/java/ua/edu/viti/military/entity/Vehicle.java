@@ -68,6 +68,9 @@ public class Vehicle {
     @Column(name = "last_maintenance_date")
     private LocalDate lastMaintenanceDate;
 
+    @Column(name = "next_maintenance_date")
+    private LocalDate nextMaintenanceDate;
+
     @Column(name = "last_maintenance_mileage")
     private Integer lastMaintenanceMileage;
 

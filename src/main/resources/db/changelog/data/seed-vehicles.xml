@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="seed-003-vehicles" author="gpt-5.1-codex-max" context="dev">
+        <comment>Початкові транспортні засоби для тестування</comment>
+
+        <insert tableName="vehicles">
+            <column name="model" value="BTR-4"/>
+            <column name="registration_number" value="APC-001"/>
+            <column name="category_id" valueNumeric="1"/>
+            <column name="engine_number" value="EN-APC-001"/>
+            <column name="chassis_number" value="CH-APC-001"/>
+            <column name="manufacture_year" valueNumeric="2019"/>
+            <column name="mileage" valueNumeric="25000"/>
+            <column name="fuel_type" value="DIESEL"/>
+            <column name="fuel_consumption" valueNumeric="35.0"/>
+            <column name="maintenance_interval_km" valueNumeric="5000"/>
+            <column name="last_maintenance_date" valueDate="2024-04-15"/>
+            <column name="next_maintenance_date" valueDate="2024-09-15"/>
+            <column name="last_maintenance_mileage" valueNumeric="21000"/>
+            <column name="driver_id" valueNumeric="1"/>
+            <column name="status" value="OPERATIONAL"/>
+        </insert>
+
+        <insert tableName="vehicles">
+            <column name="model" value="KrAZ-6322"/>
+            <column name="registration_number" value="TRK-101"/>
+            <column name="category_id" valueNumeric="2"/>
+            <column name="engine_number" value="EN-TRK-101"/>
+            <column name="chassis_number" value="CH-TRK-101"/>
+            <column name="manufacture_year" valueNumeric="2017"/>
+            <column name="mileage" valueNumeric="80500"/>
+            <column name="fuel_type" value="DIESEL"/>
+            <column name="fuel_consumption" valueNumeric="28.5"/>
+            <column name="maintenance_interval_km" valueNumeric="8000"/>
+            <column name="last_maintenance_date" valueDate="2024-03-10"/>
+            <column name="next_maintenance_date" valueDate="2024-08-10"/>
+            <column name="last_maintenance_mileage" valueNumeric="76000"/>
+            <column name="driver_id" valueNumeric="2"/>
+            <column name="status" value="IN_MAINTENANCE"/>
+        </insert>
+
+        <insert tableName="vehicles">
+            <column name="model" value="Renault Duster"/>
+            <column name="registration_number" value="SUV-550"/>
+            <column name="category_id" valueNumeric="3"/>
+            <column name="engine_number" value="EN-SUV-550"/>
+            <column name="chassis_number" value="CH-SUV-550"/>
+            <column name="manufacture_year" valueNumeric="2021"/>
+            <column name="mileage" valueNumeric="18500"/>
+            <column name="fuel_type" value="PETROL"/>
+            <column name="fuel_consumption" valueNumeric="8.2"/>
+            <column name="maintenance_interval_km" valueNumeric="10000"/>
+            <column name="last_maintenance_date" valueDate="2024-05-05"/>
+            <column name="next_maintenance_date" valueDate="2024-11-05"/>
+            <column name="last_maintenance_mileage" valueNumeric="10000"/>
+            <column name="driver_id" valueNumeric="3"/>
+            <column name="status" value="OPERATIONAL"/>
+        </insert>
+
+        <insert tableName="vehicles">
+            <column name="model" value="Renault Duster"/>
+            <column name="registration_number" value="SUV-551"/>
+            <column name="category_id" valueNumeric="3"/>
+            <column name="engine_number" value="EN-SUV-551"/>
+            <column name="chassis_number" value="CH-SUV-551"/>
+            <column name="manufacture_year" valueNumeric="2022"/>
+            <column name="mileage" valueNumeric="9500"/>
+            <column name="fuel_type" value="PETROL"/>
+            <column name="fuel_consumption" valueNumeric="7.9"/>
+            <column name="maintenance_interval_km" valueNumeric="10000"/>
+            <column name="last_maintenance_date" valueDate="2024-02-20"/>
+            <column name="next_maintenance_date" valueDate="2024-08-20"/>
+            <column name="last_maintenance_mileage" valueNumeric="5000"/>
+            <column name="status" value="OPERATIONAL"/>
+        </insert>
+
+        <insert tableName="vehicles">
+            <column name="model" value="KrAZ-6322"/>
+            <column name="registration_number" value="TRK-102"/>
+            <column name="category_id" valueNumeric="2"/>
+            <column name="engine_number" value="EN-TRK-102"/>
+            <column name="chassis_number" value="CH-TRK-102"/>
+            <column name="manufacture_year" valueNumeric="2016"/>
+            <column name="mileage" valueNumeric="92000"/>
+            <column name="fuel_type" value="DIESEL"/>
+            <column name="fuel_consumption" valueNumeric="30.1"/>
+            <column name="maintenance_interval_km" valueNumeric="8000"/>
+            <column name="last_maintenance_date" valueDate="2024-01-25"/>
+            <column name="next_maintenance_date" valueDate="2024-06-25"/>
+            <column name="last_maintenance_mileage" valueNumeric="86000"/>
+            <column name="status" value="OUT_OF_SERVICE"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="vehicles">
+                <where>registration_number IN ('APC-001','TRK-101','SUV-550','SUV-551','TRK-102')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

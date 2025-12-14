@@ -3,9 +3,13 @@ package ua.edu.viti.military.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,36 +19,46 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "vehicle_categories")
+@Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VehicleCategory {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true, length = 50)
+    private String username;
+
     @Column(nullable = false, unique = true, length = 100)
-    private String name;
+    private String email;
 
-    @Column(nullable = false, unique = true, length = 20)
-    private String code;
+    @Column(nullable = false)
+    private String password;
 
-    @Column(length = 500)
-    private String description;
+    @Column(length = 100)
+    private String fullName;
 
-    @Column(name = "required_license", length = 20)
-    private String requiredLicense;
+    @Column(length = 50)
+    private String militaryRank;
 
-    @Column(name = "max_load_capacity")
-    private Integer maxLoadCapacity;
+    @Column(nullable = false)
+    private Boolean enabled = true;
 
-    @Column(name = "seats")
-    private Integer seats;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
