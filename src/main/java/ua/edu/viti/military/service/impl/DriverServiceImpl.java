@@ -8,6 +8,7 @@ import ua.edu.viti.military.dto.request.DriverCreateRequest;
 import ua.edu.viti.military.dto.request.DriverUpdateRequest;
 import ua.edu.viti.military.dto.response.DriverResponse;
 import ua.edu.viti.military.entity.Driver;
+import ua.edu.viti.military.exception.DuplicateResourceException;
 import ua.edu.viti.military.exception.ResourceNotFoundException;
 import ua.edu.viti.military.repository.DriverRepository;
 import ua.edu.viti.military.service.DriverService;
@@ -27,6 +28,16 @@ public class DriverServiceImpl implements DriverService {
     @Transactional
     public DriverResponse create(DriverCreateRequest request) {
         log.info("Creating driver with militaryId {}", request.getMilitaryId());
+
+        driverRepository.findByMilitaryId(request.getMilitaryId())
+                .ifPresent(existing -> {
+                    throw new DuplicateResourceException("Водій з військовим номером " + request.getMilitaryId() + " вже існує");
+                });
+
+        driverRepository.findByLicenseNumber(request.getLicenseNumber())
+                .ifPresent(existing -> {
+                    throw new DuplicateResourceException("Водій з номером посвідчення " + request.getLicenseNumber() + " вже існує");
+                });
 
         Driver driver = new Driver();
         driver.setMilitaryId(request.getMilitaryId());
@@ -70,6 +81,14 @@ public class DriverServiceImpl implements DriverService {
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Водія не знайдено"));
 
+        if (request.getMilitaryId() != null) {
+            driverRepository.findByMilitaryId(request.getMilitaryId())
+                    .filter(existing -> !existing.getId().equals(id))
+                    .ifPresent(existing -> {
+                        throw new DuplicateResourceException("Водій з військовим номером " + request.getMilitaryId() + " вже існує");
+                    });
+            driver.setMilitaryId(request.getMilitaryId());
+        }
         if (request.getFirstName() != null) {
             driver.setFirstName(request.getFirstName());
         }
@@ -83,6 +102,11 @@ public class DriverServiceImpl implements DriverService {
             driver.setRank(request.getRank());
         }
         if (request.getLicenseNumber() != null) {
+            driverRepository.findByLicenseNumber(request.getLicenseNumber())
+                    .filter(existing -> !existing.getId().equals(id))
+                    .ifPresent(existing -> {
+                        throw new DuplicateResourceException("Водій з номером посвідчення " + request.getLicenseNumber() + " вже існує");
+                    });
             driver.setLicenseNumber(request.getLicenseNumber());
         }
         if (request.getLicenseCategories() != null) {

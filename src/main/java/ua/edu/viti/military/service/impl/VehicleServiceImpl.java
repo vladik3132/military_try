@@ -12,6 +12,7 @@ import ua.edu.viti.military.entity.FuelType;
 import ua.edu.viti.military.entity.Vehicle;
 import ua.edu.viti.military.entity.VehicleCategory;
 import ua.edu.viti.military.entity.VehicleStatus;
+import ua.edu.viti.military.exception.BusinessLogicException;
 import ua.edu.viti.military.exception.DuplicateResourceException;
 import ua.edu.viti.military.exception.ResourceNotFoundException;
 import ua.edu.viti.military.repository.DriverRepository;
@@ -60,12 +61,16 @@ public class VehicleServiceImpl implements VehicleService {
         vehicle.setChassisNumber(request.getChassisNumber());
         vehicle.setManufactureYear(request.getManufactureYear());
         vehicle.setMileage(request.getMileage());
-        vehicle.setFuelType(FuelType.valueOf(request.getFuelType()));
+        vehicle.setFuelType(parseFuelType(request.getFuelType()));
         vehicle.setFuelConsumption(request.getFuelConsumption());
         vehicle.setMaintenanceIntervalKm(request.getMaintenanceIntervalKm());
+        vehicle.setLastMaintenanceDate(request.getLastMaintenanceDate());
+        vehicle.setNextMaintenanceDate(request.getNextMaintenanceDate());
         vehicle.setLastMaintenanceMileage(request.getLastMaintenanceMileage());
         vehicle.setDriver(driver);
-        vehicle.setStatus(VehicleStatus.OPERATIONAL);
+        vehicle.setStatus(request.getStatus() == null
+                ? VehicleStatus.OPERATIONAL
+                : parseStatus(request.getStatus()));
 
         Vehicle saved = vehicleRepository.save(vehicle);
         return toResponse(saved);
@@ -139,7 +144,7 @@ public class VehicleServiceImpl implements VehicleService {
             vehicle.setMileage(request.getMileage());
         }
         if (request.getFuelType() != null) {
-            vehicle.setFuelType(FuelType.valueOf(request.getFuelType().toUpperCase()));
+            vehicle.setFuelType(parseFuelType(request.getFuelType()));
         }
         if (request.getFuelConsumption() != null) {
             vehicle.setFuelConsumption(request.getFuelConsumption());
@@ -150,6 +155,9 @@ public class VehicleServiceImpl implements VehicleService {
         if (request.getLastMaintenanceDate() != null) {
             vehicle.setLastMaintenanceDate(request.getLastMaintenanceDate());
         }
+        if (request.getNextMaintenanceDate() != null) {
+            vehicle.setNextMaintenanceDate(request.getNextMaintenanceDate());
+        }
         if (request.getLastMaintenanceMileage() != null) {
             vehicle.setLastMaintenanceMileage(request.getLastMaintenanceMileage());
         }
@@ -159,7 +167,7 @@ public class VehicleServiceImpl implements VehicleService {
             vehicle.setDriver(driver);
         }
         if (request.getStatus() != null) {
-            vehicle.setStatus(VehicleStatus.valueOf(request.getStatus().toUpperCase()));
+            vehicle.setStatus(parseStatus(request.getStatus()));
         }
 
         Vehicle updated = vehicleRepository.save(vehicle);
@@ -204,6 +212,7 @@ public class VehicleServiceImpl implements VehicleService {
         dto.setFuelConsumption(vehicle.getFuelConsumption());
         dto.setMaintenanceIntervalKm(vehicle.getMaintenanceIntervalKm());
         dto.setLastMaintenanceDate(vehicle.getLastMaintenanceDate());
+        dto.setNextMaintenanceDate(vehicle.getNextMaintenanceDate());
         dto.setLastMaintenanceMileage(vehicle.getLastMaintenanceMileage());
 
         if (vehicle.getDriver() != null) {
@@ -220,5 +229,21 @@ public class VehicleServiceImpl implements VehicleService {
         dto.setUpdatedAt(vehicle.getUpdatedAt());
 
         return dto;
+    }
+
+    private FuelType parseFuelType(String fuelType) {
+        try {
+            return FuelType.valueOf(fuelType.toUpperCase());
+        } catch (Exception ex) {
+            throw new BusinessLogicException("Невідомий тип палива: " + fuelType);
+        }
+    }
+
+    private VehicleStatus parseStatus(String status) {
+        try {
+            return VehicleStatus.valueOf(status.toUpperCase());
+        } catch (Exception ex) {
+            throw new BusinessLogicException("Невідомий статус транспорту: " + status);
+        }
     }
 }
