@@ -187,4 +187,20 @@ public class VehicleServiceImpl implements VehicleService {
             throw new BusinessLogicException("Невідомий статус транспорту: " + status);
         }
     }
+
+    private FuelType parseFuelType(String fuelType) {
+        try {
+            return FuelType.valueOf(fuelType.toUpperCase());
+        } catch (Exception ex) {
+            throw new BusinessLogicException("Невідомий тип палива: " + fuelType);
+        }
+    }
+
+    private VehicleStatus parseStatus(String status) {
+        try {
+            return VehicleStatus.valueOf(status.toUpperCase());
+        } catch (Exception ex) {
+            throw new BusinessLogicException("Невідомий статус транспорту: " + status);
+        }
+    }
 }
