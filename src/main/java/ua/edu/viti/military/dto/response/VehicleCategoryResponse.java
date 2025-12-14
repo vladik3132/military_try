@@ -17,6 +17,7 @@ public class VehicleCategoryResponse {
     private String description;
     private String requiredLicense;
     private Integer maxLoadCapacity;
+    private Integer seats;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
