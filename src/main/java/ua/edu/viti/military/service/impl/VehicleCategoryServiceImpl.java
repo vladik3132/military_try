@@ -2,6 +2,9 @@ package ua.edu.viti.military.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.viti.military.dto.request.VehicleCategoryCreateRequest;
@@ -10,11 +13,11 @@ import ua.edu.viti.military.dto.response.VehicleCategoryResponse;
 import ua.edu.viti.military.entity.VehicleCategory;
 import ua.edu.viti.military.exception.DuplicateResourceException;
 import ua.edu.viti.military.exception.ResourceNotFoundException;
+import ua.edu.viti.military.mapper.VehicleCategoryMapper;
 import ua.edu.viti.military.repository.VehicleCategoryRepository;
 import ua.edu.viti.military.service.VehicleCategoryService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +26,11 @@ import java.util.stream.Collectors;
 public class VehicleCategoryServiceImpl implements VehicleCategoryService {
 
     private final VehicleCategoryRepository vehicleCategoryRepository;
+    private final VehicleCategoryMapper vehicleCategoryMapper;
 
     @Override
     @Transactional
+    @CacheEvict(value = "vehicleCategories", allEntries = true)
     public VehicleCategoryResponse create(VehicleCategoryCreateRequest request) {
         log.info("Creating vehicle category: {}", request.getName());
 
@@ -37,42 +42,39 @@ public class VehicleCategoryServiceImpl implements VehicleCategoryService {
             throw new DuplicateResourceException("Категорія з кодом " + request.getCode() + " вже існує");
         }
 
-        VehicleCategory category = new VehicleCategory();
-        category.setName(request.getName());
-        category.setCode(request.getCode());
-        category.setDescription(request.getDescription());
-        category.setRequiredLicense(request.getRequiredLicense());
-        category.setMaxLoadCapacity(request.getMaxLoadKg());
-        category.setSeats(request.getSeats());
+        VehicleCategory category = vehicleCategoryMapper.toEntity(request);
 
         VehicleCategory saved = vehicleCategoryRepository.save(category);
         log.info("Vehicle category created with ID: {}", saved.getId());
         
-        return toResponse(saved);
+        return vehicleCategoryMapper.toResponse(saved);
     }
 
     @Override
+    @Cacheable(value = "vehicleCategories", key = "#id")
     public VehicleCategoryResponse getById(Long id) {
         log.debug("Fetching vehicle category with ID: {}", id);
         
         VehicleCategory category = vehicleCategoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("VehicleCategory not found: " + id));
         
-        return toResponse(category);
+        return vehicleCategoryMapper.toResponse(category);
     }
 
     @Override
+    @Cacheable(value = "vehicleCategories", key = "'all'")
     public List<VehicleCategoryResponse> getAll() {
         log.debug("Fetching all vehicle categories");
         
-        return vehicleCategoryRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return vehicleCategoryMapper.toResponseList(vehicleCategoryRepository.findAll());
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "vehicleCategories", key = "#id"),
+            @CacheEvict(value = "vehicleCategories", key = "'all'")
+    })
     public VehicleCategoryResponse update(Long id, VehicleCategoryUpdateRequest request) {
         log.info("Updating vehicle category with ID: {}", id);
         
@@ -97,19 +99,20 @@ public class VehicleCategoryServiceImpl implements VehicleCategoryService {
             category.setCode(request.getCode());
         }
 
-        if (request.getDescription() != null) category.setDescription(request.getDescription());
-        if (request.getRequiredLicense() != null) category.setRequiredLicense(request.getRequiredLicense());
-        if (request.getMaxLoadKg() != null) category.setMaxLoadCapacity(request.getMaxLoadKg());
-        if (request.getSeats() != null) category.setSeats(request.getSeats());
+        vehicleCategoryMapper.updateEntityFromDto(request, category);
 
         VehicleCategory saved = vehicleCategoryRepository.save(category);
         log.info("Vehicle category with ID {} updated successfully", id);
         
-        return toResponse(saved);
+        return vehicleCategoryMapper.toResponse(saved);
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "vehicleCategories", key = "#id"),
+            @CacheEvict(value = "vehicleCategories", allEntries = true)
+    })
     public void delete(Long id) {
         log.info("Deleting vehicle category with ID: {}", id);
         
@@ -121,17 +124,4 @@ public class VehicleCategoryServiceImpl implements VehicleCategoryService {
         log.info("Vehicle category with ID {} deleted successfully", id);
     }
 
-    private VehicleCategoryResponse toResponse(VehicleCategory c) {
-        VehicleCategoryResponse r = new VehicleCategoryResponse();
-        r.setId(c.getId());
-        r.setName(c.getName());
-        r.setCode(c.getCode());
-        r.setDescription(c.getDescription());
-        r.setRequiredLicense(c.getRequiredLicense());
-        r.setMaxLoadCapacity(c.getMaxLoadCapacity());
-        r.setSeats(c.getSeats());
-        r.setCreatedAt(c.getCreatedAt());
-        r.setUpdatedAt(c.getUpdatedAt());
-        return r;
-    }
 }

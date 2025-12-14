@@ -2,6 +2,9 @@ package ua.edu.viti.military.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.viti.military.dto.request.VehicleCreateRequest;
@@ -15,6 +18,7 @@ import ua.edu.viti.military.entity.VehicleStatus;
 import ua.edu.viti.military.exception.BusinessLogicException;
 import ua.edu.viti.military.exception.DuplicateResourceException;
 import ua.edu.viti.military.exception.ResourceNotFoundException;
+import ua.edu.viti.military.mapper.VehicleMapper;
 import ua.edu.viti.military.repository.DriverRepository;
 import ua.edu.viti.military.repository.VehicleCategoryRepository;
 import ua.edu.viti.military.repository.VehicleRepository;
@@ -32,9 +36,14 @@ public class VehicleServiceImpl implements VehicleService {
     private final VehicleRepository vehicleRepository;
     private final VehicleCategoryRepository vehicleCategoryRepository;
     private final DriverRepository driverRepository;
+    private final VehicleMapper vehicleMapper;
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "vehicles", key = "'all'"),
+            @CacheEvict(value = "vehicleMaintenance", allEntries = true)
+    })
     public VehicleResponse create(VehicleCreateRequest request) {
         log.info("Creating vehicle with registration number: {}", request.getRegistrationNumber());
 
@@ -53,37 +62,28 @@ public class VehicleServiceImpl implements VehicleService {
                     .orElseThrow(() -> new ResourceNotFoundException("Водія не знайдено"));
         }
 
-        Vehicle vehicle = new Vehicle();
-        vehicle.setModel(request.getModel());
-        vehicle.setRegistrationNumber(request.getRegistrationNumber());
+        Vehicle vehicle = vehicleMapper.toEntity(request);
         vehicle.setCategory(category);
-        vehicle.setEngineNumber(request.getEngineNumber());
-        vehicle.setChassisNumber(request.getChassisNumber());
-        vehicle.setManufactureYear(request.getManufactureYear());
-        vehicle.setMileage(request.getMileage());
-        vehicle.setFuelType(parseFuelType(request.getFuelType()));
-        vehicle.setFuelConsumption(request.getFuelConsumption());
-        vehicle.setMaintenanceIntervalKm(request.getMaintenanceIntervalKm());
-        vehicle.setLastMaintenanceDate(request.getLastMaintenanceDate());
-        vehicle.setNextMaintenanceDate(request.getNextMaintenanceDate());
-        vehicle.setLastMaintenanceMileage(request.getLastMaintenanceMileage());
         vehicle.setDriver(driver);
+        vehicle.setFuelType(parseFuelType(request.getFuelType()));
         vehicle.setStatus(request.getStatus() == null
                 ? VehicleStatus.OPERATIONAL
                 : parseStatus(request.getStatus()));
 
         Vehicle saved = vehicleRepository.save(vehicle);
-        return toResponse(saved);
+        return vehicleMapper.toResponse(saved);
     }
 
     @Override
+    @Cacheable(value = "vehicles", key = "#id")
     public VehicleResponse getById(Long id) {
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Транспорт з ID " + id + " не знайдено"));
-        return toResponse(vehicle);
+        return vehicleMapper.toResponse(vehicle);
     }
 
     @Override
+    @Cacheable(value = "vehicles", key = "'all'", condition = "#status == null && #categoryId == null && #driverId == null")
     public List<VehicleResponse> getAll(VehicleStatus status, Long categoryId, Long driverId) {
         List<Vehicle> vehicles;
 
@@ -101,20 +101,22 @@ public class VehicleServiceImpl implements VehicleService {
             vehicles = vehicleRepository.findAll();
         }
 
-        return vehicles.stream().map(this::toResponse).collect(Collectors.toList());
+        return vehicleMapper.toResponseList(vehicles);
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "vehicles", key = "#id"),
+            @CacheEvict(value = "vehicles", key = "'all'"),
+            @CacheEvict(value = "vehicleMaintenance", allEntries = true)
+    })
     public VehicleResponse update(Long id, VehicleUpdateRequest request) {
         log.info("Updating vehicle with ID {}", id);
 
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Транспорт не знайдено"));
 
-        if (request.getModel() != null) {
-            vehicle.setModel(request.getModel());
-        }
         if (request.getRegistrationNumber() != null) {
             // Перевірка унікальності
             vehicleRepository.findByRegistrationNumber(request.getRegistrationNumber())
@@ -124,42 +126,16 @@ public class VehicleServiceImpl implements VehicleService {
                                 "Транспорт з реєстраційним номером " + request.getRegistrationNumber() + " вже існує"
                         );
                     });
-            vehicle.setRegistrationNumber(request.getRegistrationNumber());
         }
+        vehicleMapper.updateEntityFromDto(request, vehicle);
+
         if (request.getCategoryId() != null) {
             VehicleCategory category = vehicleCategoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Категорія не знайдена"));
             vehicle.setCategory(category);
         }
-        if (request.getEngineNumber() != null) {
-            vehicle.setEngineNumber(request.getEngineNumber());
-        }
-        if (request.getChassisNumber() != null) {
-            vehicle.setChassisNumber(request.getChassisNumber());
-        }
-        if (request.getManufactureYear() != null) {
-            vehicle.setManufactureYear(request.getManufactureYear());
-        }
-        if (request.getMileage() != null) {
-            vehicle.setMileage(request.getMileage());
-        }
         if (request.getFuelType() != null) {
             vehicle.setFuelType(parseFuelType(request.getFuelType()));
-        }
-        if (request.getFuelConsumption() != null) {
-            vehicle.setFuelConsumption(request.getFuelConsumption());
-        }
-        if (request.getMaintenanceIntervalKm() != null) {
-            vehicle.setMaintenanceIntervalKm(request.getMaintenanceIntervalKm());
-        }
-        if (request.getLastMaintenanceDate() != null) {
-            vehicle.setLastMaintenanceDate(request.getLastMaintenanceDate());
-        }
-        if (request.getNextMaintenanceDate() != null) {
-            vehicle.setNextMaintenanceDate(request.getNextMaintenanceDate());
-        }
-        if (request.getLastMaintenanceMileage() != null) {
-            vehicle.setLastMaintenanceMileage(request.getLastMaintenanceMileage());
         }
         if (request.getDriverId() != null) {
             Driver driver = driverRepository.findById(request.getDriverId())
@@ -171,11 +147,16 @@ public class VehicleServiceImpl implements VehicleService {
         }
 
         Vehicle updated = vehicleRepository.save(vehicle);
-        return toResponse(updated);
+        return vehicleMapper.toResponse(updated);
     }
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "vehicles", key = "#id"),
+            @CacheEvict(value = "vehicles", key = "'all'"),
+            @CacheEvict(value = "vehicleMaintenance", allEntries = true)
+    })
     public void delete(Long id) {
         log.info("Deleting vehicle with ID {}", id);
 
@@ -186,49 +167,25 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
+    @Cacheable(value = "vehicleMaintenance", key = "'pending'")
     public List<VehicleResponse> findVehiclesRequiringMaintenance() {
-        return vehicleRepository.findVehiclesRequiringMaintenance().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return vehicleMapper.toResponseList(vehicleRepository.findVehiclesRequiringMaintenance());
     }
 
-    private VehicleResponse toResponse(Vehicle vehicle) {
-        VehicleResponse dto = new VehicleResponse();
-        dto.setId(vehicle.getId());
-        dto.setModel(vehicle.getModel());
-        dto.setRegistrationNumber(vehicle.getRegistrationNumber());
-
-        if (vehicle.getCategory() != null) {
-            dto.setCategoryId(vehicle.getCategory().getId());
-            dto.setCategoryName(vehicle.getCategory().getName());
-            dto.setCategoryCode(vehicle.getCategory().getCode());
+    private FuelType parseFuelType(String fuelType) {
+        try {
+            return FuelType.valueOf(fuelType.toUpperCase());
+        } catch (Exception ex) {
+            throw new BusinessLogicException("Невідомий тип палива: " + fuelType);
         }
+    }
 
-        dto.setEngineNumber(vehicle.getEngineNumber());
-        dto.setChassisNumber(vehicle.getChassisNumber());
-        dto.setManufactureYear(vehicle.getManufactureYear());
-        dto.setMileage(vehicle.getMileage());
-        dto.setFuelType(vehicle.getFuelType());
-        dto.setFuelConsumption(vehicle.getFuelConsumption());
-        dto.setMaintenanceIntervalKm(vehicle.getMaintenanceIntervalKm());
-        dto.setLastMaintenanceDate(vehicle.getLastMaintenanceDate());
-        dto.setNextMaintenanceDate(vehicle.getNextMaintenanceDate());
-        dto.setLastMaintenanceMileage(vehicle.getLastMaintenanceMileage());
-
-        if (vehicle.getDriver() != null) {
-            dto.setDriverId(vehicle.getDriver().getId());
-            String fullName = String.join(" ",
-                    vehicle.getDriver().getLastName() != null ? vehicle.getDriver().getLastName() : "",
-                    vehicle.getDriver().getFirstName() != null ? vehicle.getDriver().getFirstName() : ""
-            ).trim();
-            dto.setDriverFullName(fullName);
+    private VehicleStatus parseStatus(String status) {
+        try {
+            return VehicleStatus.valueOf(status.toUpperCase());
+        } catch (Exception ex) {
+            throw new BusinessLogicException("Невідомий статус транспорту: " + status);
         }
-
-        dto.setStatus(vehicle.getStatus());
-        dto.setCreatedAt(vehicle.getCreatedAt());
-        dto.setUpdatedAt(vehicle.getUpdatedAt());
-
-        return dto;
     }
 
     private FuelType parseFuelType(String fuelType) {
