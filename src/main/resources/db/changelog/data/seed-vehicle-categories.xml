@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="seed-001-vehicle-categories" author="gpt-5.1-codex-max" context="dev">
+        <comment>Початкові категорії транспортних засобів</comment>
+
+        <insert tableName="vehicle_categories">
+            <column name="name" value="Бронетранспортер"/>
+            <column name="code" value="APC"/>
+            <column name="description" value="Броньовані транспортні засоби"/>
+            <column name="required_license" value="C"/>
+            <column name="max_load_capacity" valueNumeric="12000"/>
+            <column name="seats" valueNumeric="8"/>
+        </insert>
+
+        <insert tableName="vehicle_categories">
+            <column name="name" value="Вантажівка"/>
+            <column name="code" value="TRUCK"/>
+            <column name="description" value="Тактичні вантажні автомобілі"/>
+            <column name="required_license" value="C"/>
+            <column name="max_load_capacity" valueNumeric="8000"/>
+            <column name="seats" valueNumeric="3"/>
+        </insert>
+
+        <insert tableName="vehicle_categories">
+            <column name="name" value="Позашляховик"/>
+            <column name="code" value="SUV"/>
+            <column name="description" value="Колісні машини підвищеної прохідності"/>
+            <column name="required_license" value="B"/>
+            <column name="max_load_capacity" valueNumeric="1200"/>
+            <column name="seats" valueNumeric="5"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="vehicle_categories">
+                <where>code IN ('APC','TRUCK','SUV')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
