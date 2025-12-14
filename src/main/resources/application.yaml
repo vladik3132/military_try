@@ -10,13 +10,29 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+    drop-first: false
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 60000
 
 springdoc:
   api-docs:
@@ -25,6 +41,25 @@ springdoc:
     path: /swagger-ui.html
     tags-sorter: alpha
     operations-sorter: alpha
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus,info
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+info:
+  app:
+    name: Military Warehouse API
+    version: 2.0.0
+    stage: Stage 2
 
 logging:
   level:
@@ -38,3 +73,8 @@ server:
   error:
     include-message: always
     include-binding-errors: always
+
+app:
+  jwt:
+    secret: VerySecretKeyThatShouldBeAtLeast256BitsLongForHS256AlgorithmSecurity
+    expiration-ms: 86400000

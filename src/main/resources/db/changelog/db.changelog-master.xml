@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <include file="db/changelog/changes/001-create-vehicle-categories.xml"/>
+    <include file="db/changelog/changes/002-create-drivers.xml"/>
+    <include file="db/changelog/changes/003-create-vehicles.xml"/>
+    <include file="db/changelog/changes/004-add-indexes.xml"/>
+    <include file="db/changelog/changes/005-create-vehicle-movements.xml"/>
+    <include file="db/changelog/changes/006-create-users-roles.xml"/>
+
+    <include file="db/changelog/data/seed-vehicle-categories.xml"/>
+    <include file="db/changelog/data/seed-drivers.xml"/>
+    <include file="db/changelog/data/seed-vehicles.xml"/>
+</databaseChangeLog>

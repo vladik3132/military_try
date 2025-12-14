@@ -11,8 +11,14 @@ public class VehicleCategoryUpdateRequest {
     @Size(max = 100, groups = OnUpdate.class)
     private String name;
 
+    @Size(max = 20, groups = OnUpdate.class)
+    private String code;
+
     @Size(max = 255, groups = OnUpdate.class)
     private String description;
+
+    @Size(max = 20, groups = OnUpdate.class)
+    private String requiredLicense;
 
     @Positive(groups = OnUpdate.class, message = "Вантажопідйомність має бути > 0")
     private Integer maxLoadKg;
