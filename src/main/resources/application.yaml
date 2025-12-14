@@ -50,6 +50,9 @@ management:
   endpoint:
     health:
       show-details: always
+  info:
+    env:
+      enabled: true
   metrics:
     export:
       prometheus:

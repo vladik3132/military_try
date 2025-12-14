@@ -97,6 +97,7 @@ public class DriverServiceImpl implements DriverService {
                     .ifPresent(existing -> {
                         throw new DuplicateResourceException("Водій з номером посвідчення " + request.getLicenseNumber() + " вже існує");
                     });
+            driver.setLicenseNumber(request.getLicenseNumber());
         }
         driverMapper.updateEntityFromDto(request, driver);
 

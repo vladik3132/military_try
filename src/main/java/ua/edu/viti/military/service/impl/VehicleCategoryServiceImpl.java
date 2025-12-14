@@ -30,7 +30,7 @@ public class VehicleCategoryServiceImpl implements VehicleCategoryService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "vehicleCategories", key = "'all'")
+    @CacheEvict(value = "vehicleCategories", allEntries = true)
     public VehicleCategoryResponse create(VehicleCategoryCreateRequest request) {
         log.info("Creating vehicle category: {}", request.getName());
 
