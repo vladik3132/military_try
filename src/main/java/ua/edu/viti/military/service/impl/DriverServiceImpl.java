@@ -36,12 +36,14 @@ public class DriverServiceImpl implements DriverService {
 
         driverRepository.findByMilitaryId(request.getMilitaryId())
                 .ifPresent(existing -> {
-                    throw new DuplicateResourceException("Водій з військовим номером " + request.getMilitaryId() + " вже існує");
+                    String message = "Водій з військовим номером " + request.getMilitaryId() + " вже існує";
+                    throw new DuplicateResourceException(message);
                 });
 
         driverRepository.findByLicenseNumber(request.getLicenseNumber())
                 .ifPresent(existing -> {
-                    throw new DuplicateResourceException("Водій з номером посвідчення " + request.getLicenseNumber() + " вже існує");
+                    String message = "Водій з номером посвідчення " + request.getLicenseNumber() + " вже існує";
+                    throw new DuplicateResourceException(message);
                 });
 
         Driver driver = driverMapper.toEntity(request);
@@ -87,7 +89,8 @@ public class DriverServiceImpl implements DriverService {
             driverRepository.findByMilitaryId(request.getMilitaryId())
                     .filter(existing -> !existing.getId().equals(id))
                     .ifPresent(existing -> {
-                        throw new DuplicateResourceException("Водій з військовим номером " + request.getMilitaryId() + " вже існує");
+                        String message = "Водій з військовим номером " + request.getMilitaryId() + " вже існує";
+                        throw new DuplicateResourceException(message);
                     });
             driver.setMilitaryId(request.getMilitaryId());
         }
@@ -95,7 +98,8 @@ public class DriverServiceImpl implements DriverService {
             driverRepository.findByLicenseNumber(request.getLicenseNumber())
                     .filter(existing -> !existing.getId().equals(id))
                     .ifPresent(existing -> {
-                        throw new DuplicateResourceException("Водій з номером посвідчення " + request.getLicenseNumber() + " вже існує");
+                        String message = "Водій з номером посвідчення " + request.getLicenseNumber() + " вже існує";
+                        throw new DuplicateResourceException(message);
                     });
             driver.setLicenseNumber(request.getLicenseNumber());
         }

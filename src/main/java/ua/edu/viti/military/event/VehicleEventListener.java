@@ -24,7 +24,10 @@ public class VehicleEventListener {
     public void handleVehicleEvent(VehicleEvent event) {
         log.info(
                 "Processing vehicle event: vehicleId={}, regNumber={}, type={}, by={}",
-                event.getVehicleId(), event.getRegistrationNumber(), event.getType(), event.getPerformedBy()
+                event.getVehicleId(),
+                event.getRegistrationNumber(),
+                event.getType(),
+                event.getPerformedBy()
         );
 
         metricsService.recordEventObserved();
@@ -34,7 +37,9 @@ public class VehicleEventListener {
             simulateSlowNotification();
         }
 
-        if (event.getType() == VehicleMovementType.ASSIGN_DRIVER || event.getType() == VehicleMovementType.UNASSIGN_DRIVER) {
+        boolean driverChange = event.getType() == VehicleMovementType.ASSIGN_DRIVER
+                || event.getType() == VehicleMovementType.UNASSIGN_DRIVER;
+        if (driverChange) {
             log.info("Updating cached driver assignment info for vehicle {}", event.getRegistrationNumber());
             simulateSlowNotification();
         }

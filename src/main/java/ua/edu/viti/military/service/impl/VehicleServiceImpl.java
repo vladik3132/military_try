@@ -83,7 +83,11 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Cacheable(value = "vehicles", key = "'all'", condition = "#status == null && #categoryId == null && #driverId == null")
+    @Cacheable(
+            value = "vehicles",
+            key = "'all'",
+            condition = "#status == null && #categoryId == null && #driverId == null"
+    )
     public List<VehicleResponse> getAll(VehicleStatus status, Long categoryId, Long driverId) {
         List<Vehicle> vehicles;
 

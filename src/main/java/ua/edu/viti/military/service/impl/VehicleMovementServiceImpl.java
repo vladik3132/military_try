@@ -154,8 +154,14 @@ public class VehicleMovementServiceImpl implements VehicleMovementService {
 
             Vehicle saved = vehicleRepository.save(vehicle);
 
-            VehicleMovement movement = buildMovement(saved, saved.getDriver(), VehicleMovementType.RETURN_FROM_MAINTENANCE,
-                    previousStatus, saved.getStatus(), request.getNotes());
+            VehicleMovement movement = buildMovement(
+                    saved,
+                    saved.getDriver(),
+                    VehicleMovementType.RETURN_FROM_MAINTENANCE,
+                    previousStatus,
+                    saved.getStatus(),
+                    request.getNotes()
+            );
             VehicleMovement persisted = vehicleMovementRepository.save(movement);
             publishEvent(saved, movement);
             metricsService.recordMaintenanceCompletion();
