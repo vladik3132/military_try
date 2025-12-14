@@ -19,15 +19,19 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Military Warehouse API - Система управління військовим транспортом")
                         .version("1.0.0")
-                        .description(
-                                "REST API для системи управління військовим транспортом та логістикою.\n\n" +
-                                        "**Функціональність:**\n" +
-                                        "- Управління категоріями транспорту\n" +
-                                        "- CRUD операції з транспортом (Vehicle)\n" +
-                                        "- Управління водіями (Driver)\n" +
-                                        "- Контроль технічного обслуговування (ТО)\n" +
-                                        "- Контроль пробігу та палива\n\n" +
-                                        "**Технології:** Spring Boot 3.2, Spring Data JPA, PostgreSQL, Lombok, Swagger/OpenAPI 3.0"
+                        .description("""
+                                REST API для системи управління військовим транспортом та логістикою.
+
+                                **Функціональність:**
+                                - Управління категоріями транспорту
+                                - CRUD операції з транспортом (Vehicle)
+                                - Управління водіями (Driver)
+                                - Контроль технічного обслуговування (ТО)
+                                - Контроль пробігу та палива
+
+                                **Технології:** Spring Boot 3.2, Spring Data JPA,
+                                PostgreSQL, Lombok, Swagger/OpenAPI 3.0
+                                """
                         )
                         .contact(new Contact()
                                 .name("ВНЗ ВІТС")

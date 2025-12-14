@@ -43,6 +43,9 @@ public class VehicleCategory {
     @Column(name = "max_load_capacity")
     private Integer maxLoadCapacity;
 
+    @Column(name = "seats")
+    private Integer seats;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
